@@ -4,13 +4,13 @@ package com.blogger.articleManager.controller;
 import com.blogger.articleManager.exceptions.ArticleNotFoundException;
 import com.blogger.articleManager.exceptions.InvalidArticleException;
 import com.blogger.articleManager.models.dtos.ArticleDTO;
+import com.blogger.articleManager.models.dtos.ArticleSearchCriteria;
 import com.blogger.articleManager.service.ArticleService;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -81,46 +81,9 @@ public class ArticleController {
         }
     }
 
-    // Read: Get articles by author
-    @GetMapping("/author/{author}")
-    public ResponseEntity<List<ArticleDTO>> getArticlesByAuthor(@PathVariable String author) {
-        List<ArticleDTO> articles = articleService.getArticlesByAuthor(author);
-        return ResponseEntity.ok(articles);
-    }
-
-    // Search: Get articles by keyword in title
+    // Unified search: query, author, tags, date range, sort
     @GetMapping("/search")
-    public ResponseEntity<List<ArticleDTO>> searchArticlesByKeyword(@RequestParam String keyword) {
-        List<ArticleDTO> articles = articleService.searchArticlesByKeyword(keyword);
-        return ResponseEntity.ok(articles);
-    }
-
-    // Read: Get recent articles after a specific date
-    @GetMapping("/recent")
-    public ResponseEntity<List<ArticleDTO>> getRecentArticles(@RequestParam LocalDateTime date) {
-        List<ArticleDTO> articles = articleService.getRecentArticles(date);
-        return ResponseEntity.ok(articles);
-    }
-
-    // Read: Get articles by author sorted by creation date
-    @GetMapping("/author/{author}/sorted")
-    public ResponseEntity<List<ArticleDTO>> getArticlesByAuthorSorted(@PathVariable String author) {
-        List<ArticleDTO> articles = articleService.getArticlesByAuthorSorted(author);
-        return ResponseEntity.ok(articles);
-    }
-
-    // Read: Get articles by tag
-    @GetMapping("/tag/{tag}")
-    public ResponseEntity<List<ArticleDTO>> getArticlesByTag(@PathVariable String tag) {
-        List<ArticleDTO> articles = articleService.getArticlesByTag(tag);
-        return ResponseEntity.ok(articles);
-    }
-
-    // Search: Get articles by keyword in title and tag
-    @GetMapping("/searchByKeywordAndTag")
-    public ResponseEntity<List<ArticleDTO>> searchArticlesByKeywordAndTag(
-            @RequestParam String keyword, @RequestParam String tag) {
-        List<ArticleDTO> articles = articleService.searchArticlesByKeywordAndTag(keyword, tag);
-        return ResponseEntity.ok(articles);
+    public ResponseEntity<List<ArticleDTO>> search(ArticleSearchCriteria criteria) {
+        return ResponseEntity.ok(articleService.search(criteria));
     }
 }

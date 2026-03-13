@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ArticleRepository extends MongoRepository<Article, ObjectId> {
+public interface ArticleRepository extends MongoRepository<Article, ObjectId>, ArticleRepositoryCustom {
 
     /**
      * Find an article by its ObjectId.

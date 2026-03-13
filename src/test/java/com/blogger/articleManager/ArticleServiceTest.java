@@ -2,6 +2,7 @@ package com.blogger.articleManager;
 
 import com.blogger.articleManager.models.Article;
 import com.blogger.articleManager.models.dtos.ArticleDTO;
+import com.blogger.articleManager.models.dtos.ArticleSearchCriteria;
 import com.blogger.articleManager.repositories.ArticleRepository;
 import com.blogger.articleManager.service.ArticleService;
 import org.bson.types.ObjectId;
@@ -40,6 +41,53 @@ public class ArticleServiceTest {
 
         assertNotNull(savedArticleDTO);
         assertEquals(articleDTO.getTitle(), savedArticleDTO.getTitle());
+    }
+
+    // --- search ---
+
+    @Test
+    public void search_delegatesToRepositoryAndMapsResults() {
+        ArticleSearchCriteria criteria = new ArticleSearchCriteria();
+        criteria.setQuery("spring");
+
+        Article article = new Article(new ObjectId(), "Spring Guide", "Content", "Alice", List.of("java"), LocalDateTime.now());
+        when(articleRepository.search(criteria)).thenReturn(List.of(article));
+
+        List<ArticleDTO> results = articleService.search(criteria);
+
+        assertEquals(1, results.size());
+        assertEquals("Spring Guide", results.get(0).getTitle());
+        assertEquals("Alice", results.get(0).getAuthor());
+        verify(articleRepository).search(criteria);
+    }
+
+    @Test
+    public void search_emptyRepositoryResults_returnsEmptyList() {
+        ArticleSearchCriteria criteria = new ArticleSearchCriteria();
+        when(articleRepository.search(criteria)).thenReturn(List.of());
+
+        List<ArticleDTO> results = articleService.search(criteria);
+
+        assertTrue(results.isEmpty());
+        verify(articleRepository).search(criteria);
+    }
+
+    @Test
+    public void search_multipleResults_allMappedToDTOs() {
+        ArticleSearchCriteria criteria = new ArticleSearchCriteria();
+        criteria.setAuthor("Alice");
+
+        List<Article> articles = List.of(
+                new Article(new ObjectId(), "Article One", "Content", "Alice", List.of("tag1"), LocalDateTime.now()),
+                new Article(new ObjectId(), "Article Two", "Content", "Alice", List.of("tag2"), LocalDateTime.now())
+        );
+        when(articleRepository.search(criteria)).thenReturn(articles);
+
+        List<ArticleDTO> results = articleService.search(criteria);
+
+        assertEquals(2, results.size());
+        assertEquals("Article One", results.get(0).getTitle());
+        assertEquals("Article Two", results.get(1).getTitle());
     }
 
 }
